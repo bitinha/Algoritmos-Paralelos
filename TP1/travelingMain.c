@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "travelingGreedy.c"
+#include "travelingMC.c"
 
 int main(int argc, char const *argv[])
 {
@@ -49,6 +50,14 @@ int main(int argc, char const *argv[])
 		
 	}
 
+	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+    
+    
+    double distanceMC = MC(D, N, &order);
+    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
+    for (int i = 0; i < N-1; ++i) {
+		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+	}
 	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
 
 	free(order);
