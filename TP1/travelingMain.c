@@ -33,16 +33,23 @@ int main(int argc, char const *argv[])
 
 	int *order;
 
-	double distance = greedy(D,N,&order);
+	int starting_town = rand() % N;
+
+	double distance = greedy(D,N,&order,starting_town);
 
 
 
 
 	printf("%f\n", distance);
 
-	printf("%d\n", order[1]);
 
-	printf("%d\n", order[0]);
+	for (int i = 0; i < N-1; ++i)
+	{
+		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+		
+	}
+
+	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
 
 	free(order);
 	free(D);

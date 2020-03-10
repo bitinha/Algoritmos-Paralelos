@@ -1,8 +1,8 @@
 
-#define INF 99999999
+#include <math.h>
 
 
-double greedy(double* D, int N, int** order){
+double greedy(double* D, int N, int** order, int starting_town){
 
 	double distance = 0;
 	*order = (int*)malloc(sizeof(int)*N);
@@ -14,11 +14,12 @@ double greedy(double* D, int N, int** order){
 		visited[i] = 0;
 	}
 
-	(*order)[0] = 0;
-	visited[0] = 1;
+
+	(*order)[0] = starting_town;
+	visited[starting_town] = 1;
 
 	for (int i = 0; i < N-1; i++){
-		double min = INF;
+		double min = INFINITY;
 		for (int j = 0; j < N; j++){
 			
 			// Check if town has not yet been visited
@@ -31,7 +32,7 @@ double greedy(double* D, int N, int** order){
 			} 
 		}
 
-		visited[(*order)[i+1]];
+		visited[(*order)[i+1]] = 1;
 		distance += D[(*order)[i]*N + (*order)[i+1]];
 	}
 
