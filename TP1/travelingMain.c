@@ -7,18 +7,29 @@
 
 int main(int argc, char const *argv[])
 {
-
+	int printPath = 0;
+	int iterations = 100;
 	int seed = 0;
-
-	if (argc>1)
-	{
-		seed = atoi(argv[1]);
-	}
-	
-	srand(seed);
 
 	// Number of towns to visit
 	int N = 10;
+
+	if (argc>1)
+	{
+		N = atoi(argv[1]);
+	}
+
+	if (argc>2)
+	{
+		iterations = atoi(argv[2]);
+	}
+
+	if (argc>3)
+	{
+		seed = atoi(argv[3]);
+	}
+	
+	srand(seed);
 
 	double *x = malloc(sizeof(double)*N);
 	double *y = malloc(sizeof(double)*N);
@@ -48,32 +59,40 @@ int main(int argc, char const *argv[])
 
 
 
-	printf("%f\n", distance);
+	printf("distance Greedy: %f\n", distance);
 
-
-	for (int i = 0; i < N-1; ++i)
-	{
-		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-		
+	if(printPath){
+		for (int i = 0; i < N-1; ++i)
+		{
+			printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+			
+		}
+		printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
 	}
+    
+    
+    double distanceMC = MC(D, N, &order, iterations);
 
-	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
-    
-    
-    double distanceMC = MC(D, N, &order);
     printf("\nDistance Monte-Carlo: %f\n", distanceMC);
-    for (int i = 0; i < N-1; ++i) {
-		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-	}
-	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+    
+    if(printPath){
+        for (int i = 0; i < N-1; ++i) {
+    		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+    	}
+    	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+    }
 
-    double distanceSA = SA(D, N, &order, 1);
+
+    double distanceSA = SA(D, N, &order, iterations, 1);
+    
     printf("\nDistance Simulated Annealing: %f\n", distanceSA);
-    for (int i = 0; i < N-1; ++i) {
-		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-	}
-	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
-
+    if(printPath){
+        for (int i = 0; i < N-1; ++i) {
+    		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+    	}
+    	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+    }
+	
 	free(order);
 	free(D);
 	free(y);

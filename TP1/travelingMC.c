@@ -18,7 +18,7 @@ void randperm(int *array, int N) {
     shuffle(array, N);
 }
 
-double MC(double* D, int N, int **town) {
+double MC(double* D, int N, int **town, int iterations) {
     *town = malloc(sizeof(int) * N);
     double Tdist;
     int i = 0, previous, next1, next2;
@@ -30,7 +30,7 @@ double MC(double* D, int N, int **town) {
         Tdist += D[(*town)[i]*N +  (*town)[i + 1]];
     }
     
-    while (i < 100) { // stop if no changes occur for 100 trials
+    while (i < iterations) { // stop if no changes occur for 100 trials
         int c = rand() % N; // randomly chooses a town (at position c in route)
         if (c == 0) {
             previous = N - 1;
@@ -82,7 +82,7 @@ double MC(double* D, int N, int **town) {
 
 
 
-double SA(double* D, int N, int **town, double T) {
+double SA(double* D, int N, int **town, int iterations, double T) {
     *town = malloc(sizeof(int) * N);
     double Tdist;
     int i = 0, previous, next1, next2;
@@ -94,7 +94,7 @@ double SA(double* D, int N, int **town, double T) {
         Tdist += D[(*town)[i]*N +  (*town)[i + 1]];
     }
     
-    while (i < 100) { // stop if no changes occur for 100 trials
+    while (i < iterations) { // stop if no changes occur for 100 trials
         int c = rand() % N; // randomly chooses a town (at position c in route)
         if (c == 0) {
             previous = N - 1;
