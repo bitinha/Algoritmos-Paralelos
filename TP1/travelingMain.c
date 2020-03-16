@@ -7,8 +7,15 @@
 
 int main(int argc, char const *argv[])
 {
+
+	int seed = 0;
+
+	if (argc>1)
+	{
+		seed = atoi(argv[1]);
+	}
 	
-	srand(0);
+	srand(seed);
 
 	// Number of towns to visit
 	int N = 10;
