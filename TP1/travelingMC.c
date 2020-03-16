@@ -25,9 +25,9 @@ double MC(double* D, int N, int **town) {
     
     randperm(*town, N); // a random permutation of the first n integers
     
-    Tdist = D[town[N-1], (*town)[0]];
+    Tdist = D[(*town)[N-1]*N +  (*town)[0]];
     for (int i = 0; i < N-1; i++) { // initial length of route
-        Tdist += D[(*town)[i], (*town)[i + 1]];
+        Tdist += D[(*town)[i]*N +  (*town)[i + 1]];
     }
     
     while (i < 100) { // stop if no changes occur for 100 trials
@@ -52,10 +52,10 @@ double MC(double* D, int N, int **town) {
 
         // delta=increment in length of route
         double delta =
-            D[(*town)[previous], (*town)[next1]]
-                + D[(*town)[c], (*town)[next2]]
-                - D[(*town)[previous], (*town)[c]]
-                - D[(*town)[next1],(*town)[next2]];
+            D[(*town)[previous]*N +  (*town)[next1]]
+                + D[(*town)[c]*N +  (*town)[next2]]
+                - D[(*town)[previous]*N +  (*town)[c]]
+                - D[(*town)[next1]*N + (*town)[next2]];
         
         // accept or discard change to route
                 
