@@ -67,6 +67,13 @@ int main(int argc, char const *argv[])
 	}
 	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
 
+    double distanceSA = SA(D, N, &order, 1);
+    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
+    for (int i = 0; i < N-1; ++i) {
+		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+	}
+	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+
 	free(order);
 	free(D);
 	free(y);
