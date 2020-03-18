@@ -1,9 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <getopt.h>
+#include <string.h>
 
 #include "travelingGreedy.c"
 #include "travelingMC.c"
+
+void usage(const char *path) {
+    // take only the last portion of the path
+    const char *basename = strrchr ( path, '/' );
+    basename = basename ? basename + 1 : path;
+
+    printf("usage: %s [OPTION]\n", basename);
+    printf(" -h, --help\t\t\tPrint this help and exit.\n");
+    printf(" -n, --number-of-towns NUMBER\tSelect the number of towns to visit.\n");
+    printf(" -i, --iterations NUMBER\tSelect the number of iterations.\n");
+    printf(" -s, --seed SEED\t\tUse a custom seed.\n");
+    printf(" -p, --printPath]\t\tPrint path of all algorithms.\n");
+}
 
 void printPathOutput(int N, int *order, double *D) {
     for (int i = 0; i < N-1; ++i) {
@@ -12,29 +27,52 @@ void printPathOutput(int N, int *order, double *D) {
     printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-	int printPath = 1;
+	int printPath = 0;
 	int iterations = 100;
 	int seed = 0;
 
 	// Number of towns to visit
 	int N = 10;
 
-	if (argc>1)
-	{
-		N = atoi(argv[1]);
-	}
+	struct option longopts[] = {
+        { "help", no_argument, NULL, 'h' },
+        { "number-of-towns", required_argument, NULL, 'n' },
+        { "iterations", required_argument, NULL, 'i' },
+        { "seed", required_argument, NULL, 's' },
+        { "printPath", no_argument, NULL, 'p' }
+    };
 
-	if (argc>2)
-	{
-		iterations = atoi(argv[2]);
-	}
-
-	if (argc>3)
-	{
-		seed = atoi(argv[3]);
-	}
+    while (1) {
+        int opt = getopt_long ( argc, argv, "hpn:i:s:", longopts, 0 );
+        if (opt == -1) {
+            /* a return value of -1 indicates that there are no more options */
+            break;
+        }
+        switch (opt) {
+            case 'h':
+                usage(argv[0]);
+                return 0;
+            case 'n':
+                N = atoi(optarg);
+                break;
+            case 'i':
+                iterations = atoi(optarg);
+                break;
+            case 's':
+                seed = atoi(optarg);
+                break;
+            case 'p':
+                printPath = 1;
+                break;
+            case '?':
+                usage(argv[0]);
+                return 1;
+            default:
+                break;
+        }
+    }
 	
 	srand(seed);
 
