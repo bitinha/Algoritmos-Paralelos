@@ -5,9 +5,16 @@
 #include "travelingGreedy.c"
 #include "travelingMC.c"
 
+void printPathOutput(int N, int *order, double *D) {
+    for (int i = 0; i < N-1; ++i) {
+        printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+    }
+    printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+}
+
 int main(int argc, char const *argv[])
 {
-	int printPath = 0;
+	int printPath = 1;
 	int iterations = 100;
 	int seed = 0;
 
@@ -62,12 +69,7 @@ int main(int argc, char const *argv[])
 	printf("distance Greedy: %f\n", distance);
 
 	if(printPath){
-		for (int i = 0; i < N-1; ++i)
-		{
-			printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-			
-		}
-		printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+		printPathOutput(N, order, D);
 	}
     
     
@@ -76,10 +78,7 @@ int main(int argc, char const *argv[])
     printf("\nDistance Monte-Carlo: %f\n", distanceMC);
     
     if(printPath){
-        for (int i = 0; i < N-1; ++i) {
-    		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-    	}
-    	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+        printPathOutput(N, order, D);
     }
 
 
@@ -87,10 +86,7 @@ int main(int argc, char const *argv[])
     
     printf("\nDistance Simulated Annealing: %f\n", distanceSA);
     if(printPath){
-        for (int i = 0; i < N-1; ++i) {
-    		printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
-    	}
-    	printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+        printPathOutput(N, order, D);
     }
 	
 	free(order);
