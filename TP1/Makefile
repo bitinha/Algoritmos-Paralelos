@@ -1,4 +1,4 @@
-CC = gcc
+CC = mpicc
 CFLAGS = -Wall -pedantic -lm -O3
 
 all: traveling

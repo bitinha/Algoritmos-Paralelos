@@ -3,6 +3,7 @@
 #include <math.h>
 #include <getopt.h>
 #include <string.h>
+#include <mpi.h>
 
 #include "travelingGreedy.c"
 #include "travelingMC.c"
@@ -95,7 +96,17 @@ int main(int argc, char *argv[])
 	}
 
 
-	int *order;
+    int rank, n_proc;
+
+    MPI_Status status;
+    MPI_Init(&argc, &argv); //Initializes the library
+    MPI_Comm_size(MPI_COMM_WORLD, &n_proc);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); //Get the id of the current process
+
+
+	srand(seed+rank);
+
+	int *order,*orderMC,*orderSA;
 
 	int starting_town = rand() % N;
 
@@ -104,33 +115,103 @@ int main(int argc, char *argv[])
 
 
 
-	printf("distance Greedy: %f\n", distance);
-
-	if(printPath){
-		printPathOutput(N, order, D);
-	}
     
     
-    double distanceMC = MC(D, N, &order, iterations);
-
-    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
-    
-    if(printPath){
-        printPathOutput(N, order, D);
-    }
+    double distanceMC = MC(D, N, &orderMC, iterations);
 
 
-    double distanceSA = SA(D, N, &order, iterations, 1);
-    
-    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
-    if(printPath){
-        printPathOutput(N, order, D);
-    }
+    double distanceSA = SA(D, N, &orderSA, iterations, 1);
 	
+
+    if(rank==0){
+    	printf("--------------------------------------------\n");
+    	printf("\n\nRESULTADO DO PROCESSO %d\n", rank);
+		
+		if (printPath)
+		{
+			printf("Distance Greedy: %f\n", distance);
+        	printPathOutput(N, order, D);
+			    
+		    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
+        	printPathOutput(N, orderMC, D);
+			
+		    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
+        	printPathOutput(N, orderSA, D);
+			printf("\n\n");
+			
+
+	    	for (int i = 1; i < n_proc; ++i)
+	    	{
+	    		MPI_Recv(order,N,MPI_INT,i,0,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(orderMC,N,MPI_INT,i,1,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(orderSA,N,MPI_INT,i,2,MPI_COMM_WORLD,&status);
+
+	    
+	    	printf("--------------------------------------------\n");
+    			printf("\n\nRESULTADO DO PROCESSO %d\n", i);
+
+				printf("Distance Greedy: %f\n", distance);
+	        	printPathOutput(N, order, D);
+				    
+			    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
+	        	printPathOutput(N, orderMC, D);
+				
+			    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
+	        	printPathOutput(N, orderSA, D);
+			    printf("\n\n");
+	    	}
+	    }else{
+
+			printf("Distance Greedy: %f\n", distance);
+			    
+		    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
+			
+		    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
+			printf("\n\n");
+			
+
+	    	for (int i = 1; i < n_proc; ++i)
+	    	{
+	    		MPI_Recv(&distance,1,MPI_DOUBLE,i,0,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(&distanceMC,1,MPI_DOUBLE,i,1,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(&distanceSA,1,MPI_DOUBLE,i,2,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(order,N,MPI_INT,i,3,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(orderMC,N,MPI_INT,i,4,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(orderSA,N,MPI_INT,i,5,MPI_COMM_WORLD,&status);
+
+	    
+    			printf("--------------------------------------------\n");
+    			printf("\n\nRESULTADO DO PROCESSO %d\n", i);
+
+				printf("Distance Greedy: %f\n", distance);
+				    
+			    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
+				
+			    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
+			    printf("\n\n");
+	    	}
+
+	    }
+    }else{
+    	MPI_Send(&distance,1,MPI_DOUBLE,0,0,MPI_COMM_WORLD);
+		MPI_Send(&distanceMC,1,MPI_DOUBLE,0,1,MPI_COMM_WORLD);
+		MPI_Send(&distanceSA,1,MPI_DOUBLE,0,2,MPI_COMM_WORLD);
+    	MPI_Send(order,N,MPI_INT,0,3,MPI_COMM_WORLD);
+		MPI_Send(orderMC,N,MPI_INT,0,4,MPI_COMM_WORLD);
+		MPI_Send(orderSA,N,MPI_INT,0,5,MPI_COMM_WORLD);
+    }
+
+
+
 	free(order);
+	free(orderSA);
+	free(orderMC);
 	free(D);
 	free(y);
 	free(x);
+
+    MPI_Finalize();
+
 
 	return 0;
 }
