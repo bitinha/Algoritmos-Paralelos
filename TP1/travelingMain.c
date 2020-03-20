@@ -21,6 +21,21 @@ void usage(const char *path) {
     printf(" -p, --printPath]\t\tPrint path of all algorithms.\n");
 }
 
+void plotGraph(char* alg, int N, int *order, double *x, double *y) {
+    FILE *gnuplotPipe = popen("gnuplot -persist", "w");
+    int i;
+    
+    fprintf(gnuplotPipe, "set title 'travelingSalesman'\n");
+    fprintf(gnuplotPipe, "set terminal svg\n");
+    fprintf(gnuplotPipe, "set output '%s.svg'\n", alg);
+    fprintf(gnuplotPipe, "plot '-' title 'Greedy' with linespoints\n");
+    for (i = 0; i < N - 1; i++)
+        fprintf(gnuplotPipe, "%g %g\n", x[order[i]], y[order[i]]);
+    fprintf(gnuplotPipe, "%g %g\n", x[order[0]], y[order[0]]);
+    fprintf(gnuplotPipe, "e\n");
+    fflush(gnuplotPipe);
+}
+
 void printPathOutput(int N, int *order, double *D) {
     for (int i = 0; i < N-1; ++i) {
         printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
@@ -131,12 +146,18 @@ int main(int argc, char *argv[])
 		{
 			printf("Distance Greedy: %f\n", distance);
         	printPathOutput(N, order, D);
+            char *greedy = "Greedy";
+            plotGraph(greedy, N, order, x, y);
 			    
 		    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
         	printPathOutput(N, orderMC, D);
+             char *mc = "Monte-Carlo";
+            plotGraph(mc, N, orderMC, x, y);
 			
 		    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
         	printPathOutput(N, orderSA, D);
+            char *sa = "Simulated-Annealing";
+            plotGraph(sa, N, orderSA, x, y);
 			printf("\n\n");
 			
 
