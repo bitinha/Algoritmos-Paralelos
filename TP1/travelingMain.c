@@ -36,11 +36,11 @@ void plotGraph(char* alg, int N, int *order, double *x, double *y) {
     fflush(gnuplotPipe);
 }
 
-void printPathOutput(int N, int *order, double *D) {
+void printPathOutput(int N, int *order, double *x, double *y) {
     for (int i = 0; i < N-1; ++i) {
-        printf("Town %d to town %d: %f\n", order[i], order[i+1], D[order[i]*N+order[i+1]]);
+        printf("Town %d to town %d: %f\n", order[i], order[i+1], sqrt(pow(x[order[i]]-x[order[i+1]],2)+pow(y[order[i]]-y[order[i+1]],2)));
     }
-    printf("Town %d to town %d: %f\n", order[N-1], order[0], D[order[N-1]*N+order[0]]);
+    printf("Town %d to town %d: %f\n", order[N-1], order[0], sqrt(pow(x[order[N-1]]-x[order[0]],2)+pow(y[order[N-1]]-y[order[0]],2)));
 }
 
 int main(int argc, char *argv[])
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
 	double *x = malloc(sizeof(double)*N);
 	double *y = malloc(sizeof(double)*N);
-	double *D = malloc(sizeof(double)*N*N);
+	//double *D = malloc(sizeof(double)*N*N);
 
 	for (int i = 0; i < N; ++i)
 	{
@@ -124,17 +124,29 @@ int main(int argc, char *argv[])
 	int *order,*orderMC,*orderSA;
 
 	int starting_town = rand() % N;
+/*
+	double t_greedy = MPI_Wtime();
+	double distance = greedyP(x,y,N,&order,starting_town);
+    t_greedy = MPI_Wtime() - t_greedy;
+    
+	double t_MC = MPI_Wtime();
+    double distanceMC = MCP(x, y, N, &orderMC, iterations);
+    t_MC = MPI_Wtime() - t_MC;
 
+	double t_SA = MPI_Wtime();
+    double distanceSA = SAP(x, y, N, &orderSA, iterations, 100000);
+	t_SA = MPI_Wtime() - t_SA;
+	*/
 	double t_greedy = MPI_Wtime();
 	double distance = greedy(D,N,&order,starting_town);
     t_greedy = MPI_Wtime() - t_greedy;
     
 	double t_MC = MPI_Wtime();
-    double distanceMC = MC(D, N, &orderMC, iterations);
+    double distanceMC = 2;//MC(D, N, &orderMC, iterations);
     t_MC = MPI_Wtime() - t_MC;
 
 	double t_SA = MPI_Wtime();
-    double distanceSA = SA(D, N, &orderSA, iterations, 1);
+    double distanceSA = 2;//SA(D, N, &orderSA, iterations, 1);
 	t_SA = MPI_Wtime() - t_SA;
 
     if(rank==0){
@@ -144,19 +156,19 @@ int main(int argc, char *argv[])
 		if (printPath)
 		{
 			printf("Distance Greedy: %f\n", distance);
-        	printPathOutput(N, order, D);
+        	printPathOutput(N, order, x, y);
             char *greedy = "Greedy";
             plotGraph(greedy, N, order, x, y);
             printf("Tempo: %f\n", t_greedy);
 			    
 		    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
-        	printPathOutput(N, orderMC, D);
+        	printPathOutput(N, orderMC, x, y);
             char *mc = "Monte-Carlo";
             plotGraph(mc, N, orderMC, x, y);
             printf("Tempo: %f\n", t_MC);
 
 		    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
-        	printPathOutput(N, orderSA, D);
+        	printPathOutput(N, orderSA, x, y);
             char *sa = "Simulated-Annealing";
             plotGraph(sa, N, orderSA, x, y);
             printf("Tempo: %f\n", t_SA);
@@ -180,15 +192,15 @@ int main(int argc, char *argv[])
     			printf("\n\nRESULTADO DO PROCESSO %d\n", i);
 
 				printf("Distance Greedy: %f\n", distance);
-	        	printPathOutput(N, order, D);
+	        	printPathOutput(N, order, x, y);
             	printf("Tempo: %f\n", t_greedy);
 				    
 			    printf("\nDistance Monte-Carlo: %f\n", distanceMC);
-	        	printPathOutput(N, orderMC, D);
+	        	printPathOutput(N, orderMC, x, y);
             	printf("Tempo: %f\n", t_MC);
 				
 			    printf("\nDistance Simulated Annealing: %f\n", distanceSA);
-	        	printPathOutput(N, orderSA, D);
+	        	printPathOutput(N, orderSA, x, y);
             	printf("Tempo: %f\n", t_SA);
 			    printf("\n\n");
 	    	}
@@ -210,6 +222,9 @@ int main(int argc, char *argv[])
 	    		MPI_Recv(&distance,1,MPI_DOUBLE,i,0,MPI_COMM_WORLD,&status);
 	    		MPI_Recv(&distanceMC,1,MPI_DOUBLE,i,1,MPI_COMM_WORLD,&status);
 	    		MPI_Recv(&distanceSA,1,MPI_DOUBLE,i,2,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(&t_greedy,1,MPI_DOUBLE,i,3,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(&t_MC,1,MPI_DOUBLE,i,4,MPI_COMM_WORLD,&status);
+	    		MPI_Recv(&t_SA,1,MPI_DOUBLE,i,5,MPI_COMM_WORLD,&status);
 
 	    
     			printf("--------------------------------------------\n");
@@ -231,10 +246,10 @@ int main(int argc, char *argv[])
     	MPI_Send(&distance,1,MPI_DOUBLE,0,0,MPI_COMM_WORLD);
 		MPI_Send(&distanceMC,1,MPI_DOUBLE,0,1,MPI_COMM_WORLD);
 		MPI_Send(&distanceSA,1,MPI_DOUBLE,0,2,MPI_COMM_WORLD);
+    	MPI_Send(&t_greedy,1,MPI_DOUBLE,0,3,MPI_COMM_WORLD);
+		MPI_Send(&t_MC,1,MPI_DOUBLE,0,4,MPI_COMM_WORLD);
+		MPI_Send(&t_SA,1,MPI_DOUBLE,0,5,MPI_COMM_WORLD);
 		if(printPath){
-	    	MPI_Send(&t_greedy,1,MPI_DOUBLE,0,3,MPI_COMM_WORLD);
-			MPI_Send(&t_MC,1,MPI_DOUBLE,0,4,MPI_COMM_WORLD);
-			MPI_Send(&t_SA,1,MPI_DOUBLE,0,5,MPI_COMM_WORLD);
 	    	MPI_Send(order,N,MPI_INT,0,6,MPI_COMM_WORLD);
 			MPI_Send(orderMC,N,MPI_INT,0,7,MPI_COMM_WORLD);
 			MPI_Send(orderSA,N,MPI_INT,0,8,MPI_COMM_WORLD);
@@ -246,7 +261,7 @@ int main(int argc, char *argv[])
 	free(order);
 	free(orderSA);
 	free(orderMC);
-	free(D);
+	//free(D);
 	free(y);
 	free(x);
 
