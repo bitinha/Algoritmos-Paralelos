@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
 	double *x = malloc(sizeof(double)*N);
 	double *y = malloc(sizeof(double)*N);
-	//double *D = malloc(sizeof(double)*N*N);
+	double *D = malloc(sizeof(double)*N*N);
 
 	for (int i = 0; i < N; ++i)
 	{
@@ -142,11 +142,11 @@ int main(int argc, char *argv[])
     t_greedy = MPI_Wtime() - t_greedy;
     
 	double t_MC = MPI_Wtime();
-    double distanceMC = 2;//MC(D, N, &orderMC, iterations);
+    double distanceMC = MC(D, N, &orderMC, iterations);
     t_MC = MPI_Wtime() - t_MC;
 
 	double t_SA = MPI_Wtime();
-    double distanceSA = 2;//SA(D, N, &orderSA, iterations, 1);
+    double distanceSA = SA(D, N, &orderSA, iterations, 1);
 	t_SA = MPI_Wtime() - t_SA;
 
     if(rank==0){
