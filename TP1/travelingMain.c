@@ -27,11 +27,15 @@ void plotGraph(char* alg, int N, int *order, double *x, double *y) {
     
     fprintf(gnuplotPipe, "set title 'travelingSalesman'\n");
     fprintf(gnuplotPipe, "set terminal svg\n");
+    fprintf(gnuplotPipe, "set yrange[0:10]\n");
+    fprintf(gnuplotPipe, "set xrange[0:10]\n");
     fprintf(gnuplotPipe, "set output '%s.svg'\n", alg);
-    fprintf(gnuplotPipe, "plot '-' title 'Greedy' with linespoints\n");
-    for (i = 0; i < N - 1; i++)
+    fprintf(gnuplotPipe, "plot '-' title 'Greedy' with linespoints, '-' title 'Starting Town' pt 5\n");
+    for (i = 0; i < N ; i++)
         fprintf(gnuplotPipe, "%g %g\n", x[order[i]], y[order[i]]);
     fprintf(gnuplotPipe, "%g %g\n", x[order[0]], y[order[0]]);
+    fprintf(gnuplotPipe, "e\n");
+    fprintf(gnuplotPipe, "%g %g\n",x[order[0]], y[order[0]]);
     fprintf(gnuplotPipe, "e\n");
     fflush(gnuplotPipe);
 }
