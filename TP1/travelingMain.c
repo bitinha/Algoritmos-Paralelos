@@ -30,7 +30,7 @@ void plotGraph(char* alg, int N, int *order, double *x, double *y) {
     fprintf(gnuplotPipe, "set yrange[0:10]\n");
     fprintf(gnuplotPipe, "set xrange[0:10]\n");
     fprintf(gnuplotPipe, "set output '%s.svg'\n", alg);
-    fprintf(gnuplotPipe, "plot '-' title 'Greedy' with linespoints, '-' title 'Starting Town' pt 5\n");
+    fprintf(gnuplotPipe, "plot '-' title '%s' with linespoints, '-' title 'Starting Town' pt 5\n",alg);
     for (i = 0; i < N ; i++)
         fprintf(gnuplotPipe, "%g %g\n", x[order[i]], y[order[i]]);
     fprintf(gnuplotPipe, "%g %g\n", x[order[0]], y[order[0]]);
