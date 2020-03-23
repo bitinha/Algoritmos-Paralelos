@@ -123,7 +123,7 @@ double SA(double* D, int N, int **town, int iterations, double T) {
         
         // accept or discard change to route
                 
-        if (delta < 0 || (T>0.001 && exp(-delta/T) < ((double)rand() / (double)RAND_MAX))) {
+        if (delta < 0 || (T>0.001 && exp(-delta/T) >= ((double)rand() / (double)RAND_MAX))) {
             // swap order of town(c) and town(c+1) in route  
             int temp = (*town)[c];
             (*town)[c] = (*town)[next1];
@@ -250,7 +250,7 @@ double SAP(double* x, double* y, int N, int **town, int iterations, double T) {
         
         // accept or discard change to route
                 
-        if (delta < 0 || (T>0.001 && exp(-delta/T) < ((double)rand() / (double)RAND_MAX))) {
+        if (delta < 0 || (T>0.001 && exp(-delta/T) >= ((double)rand() / (double)RAND_MAX))) {
             // swap order of town(c) and town(c+1) in route  
             int temp = (*town)[c];
             (*town)[c] = (*town)[next1];
