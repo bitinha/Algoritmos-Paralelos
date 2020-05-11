@@ -1,13 +1,14 @@
-
+#include <omp.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
 
+struct timeval start, end;
 
 void plotGraph(float tol, int N, float *w) {
     FILE *gnuplotPipe = popen("gnuplot -persist", "w");
-    int i;
     
     fprintf(gnuplotPipe, "unset key\n");
     fprintf(gnuplotPipe, "set style line 11 lc rgb '#808080' lt 1\n");
@@ -36,16 +37,27 @@ void plotGraph(float tol, int N, float *w) {
 
 
 float maxDifference(float *a, float *b, int N){
-	float max = fabsf(a[0]-b[0]);
+	float max_final = fabsf(a[0]-b[0]);
 	float m;
-	for (int i = 1; i < N; ++i)
-	{
-		m = fabsf(a[i]-b[i]);
-		if (m > max){
-			max = m;
-		}
-	}
-	return max;
+    
+    #pragma omp parallel
+    {
+        float max_local = max_final;
+        #pragma omp for
+        for (int i = 1; i < N; ++i)
+        {
+            m = fabsf(a[i]-b[i]);
+            if (m > max_local ){
+                max_local = m;
+            }
+        }
+        #pragma omp critical
+        if ( max_local > max_final) {
+            max_final = max_local;
+        }
+    }
+    
+	return max_final;
 }
 
 
@@ -64,11 +76,14 @@ int main(int argc, char const *argv[])
 
 	float *w = (float *)malloc(N*N*sizeof(float));
 
-
+    
+    #pragma omp parallel for
 	for (int j = 0; j < N; ++j)
 	{
 		w[j] = 100.0;
 	}
+    
+    #pragma omp parallel for
 	for (int i = 1; i < N-1; ++i)
 	{
 		w[i*N] = 100.0;
@@ -94,6 +109,8 @@ int main(int argc, char const *argv[])
 	while(diff > tol)
 	{
 		memcpy(u,w, N*N*sizeof(float));
+        
+        #pragma omp parallel for
 		for (int i = 1; i < N-1; ++i)
 		{
 			for (int j = 1 + i%2; j < N-1; j+=2)
@@ -102,6 +119,7 @@ int main(int argc, char const *argv[])
 			}
 		}
 
+        #pragma omp parallel for
 		for (int i = 1; i < N-1; ++i)
 		{
 			for (int j = 1 + (i+1)%2; j < N-1; j+=2)
