@@ -17,8 +17,8 @@ void plotGraph(float tol, int N, float *w) {
     fprintf(gnuplotPipe, "set cbtics scale 0\n");
     fprintf(gnuplotPipe, "load 'parula.pal'\n");
     fprintf(gnuplotPipe, "set terminal png\n");
-    fprintf(gnuplotPipe, "set yrange[0:%d]\n",N);
-    fprintf(gnuplotPipe, "set xrange[0:%d]\n",N);
+    fprintf(gnuplotPipe, "set yrange[-0.5:%f]\n",N-0.5);
+    fprintf(gnuplotPipe, "set xrange[-0.5:%f]\n",N-0.5);
     fprintf(gnuplotPipe, "set output '%d,%f.png'\n", N, tol);
     fprintf(gnuplotPipe, "plot '-' u ($1):($2):($3) matrix with image\n");
 
@@ -37,27 +37,19 @@ void plotGraph(float tol, int N, float *w) {
 
 
 float maxDifference(float *a, float *b, int N){
-	float max_final = fabsf(a[0]-b[0]);
+	float max = 0;
 	float m;
     
-    #pragma omp parallel
+    #pragma omp parallel for reduction(max:max)
+    for (int i = 0; i < N; ++i)
     {
-        float max_local = max_final;
-        #pragma omp for
-        for (int i = 1; i < N; ++i)
-        {
-            m = fabsf(a[i]-b[i]);
-            if (m > max_local ){
-                max_local = m;
-            }
-        }
-        #pragma omp critical
-        if ( max_local > max_final) {
-            max_final = max_local;
+        m = fabsf(a[i]-b[i]);
+        if (m > max ){
+            max = m;
         }
     }
     
-	return max_final;
+	return max;
 }
 
 
@@ -99,6 +91,8 @@ int main(int argc, char const *argv[])
 	}
 
 
+    double time = omp_get_wtime();
+
 	float p = 2/(1+sin(M_PI/(N-1)));
 
 	float diff = tol + 1;
@@ -134,6 +128,10 @@ int main(int argc, char const *argv[])
 		//printf("%f\n", diff);
 	}
 
+
+    time = omp_get_wtime() - time;
+
+
 	plotGraph(tol,N,w);
 
 	// for(int i = 0; i < N; i++){
@@ -142,6 +140,9 @@ int main(int argc, char const *argv[])
 	// 	}
 	// 	printf("\n");
 	// }
+
+	printf("Tempo de execução: %f\n",time);
+	printf("Nº de iterações: %d\n",iter);
 
 	return 0;
 }
