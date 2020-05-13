@@ -40,7 +40,7 @@ float maxDifference(float *a, float *b, int N){
 	float max = 0;
 	float m;
     
-    #pragma omp parallel for reduction(max:max)
+    #pragma omp parallel for reduction(max:max) private(m)
     for (int i = 0; i < N; ++i)
     {
         m = fabsf(a[i]-b[i]);
@@ -100,10 +100,13 @@ int main(int argc, char const *argv[])
 	int iter = 0;
 	float *u = (float *)malloc(N*N*sizeof(float));
 
+	double t1=0,t2=0,t3=0,t0=0,tp;
 	while(diff > tol)
 	{
+		tp = omp_get_wtime();
 		memcpy(u,w, N*N*sizeof(float));
-        
+        t0+= omp_get_wtime() - tp;
+		tp = omp_get_wtime();
         #pragma omp parallel for
 		for (int i = 1; i < N-1; ++i)
 		{
@@ -113,6 +116,8 @@ int main(int argc, char const *argv[])
 			}
 		}
 
+        t1+= omp_get_wtime() - tp;
+		tp = omp_get_wtime();
         #pragma omp parallel for
 		for (int i = 1; i < N-1; ++i)
 		{
@@ -122,17 +127,20 @@ int main(int argc, char const *argv[])
 			}
 		}
 		
+        t2+= omp_get_wtime() - tp;
+		tp = omp_get_wtime();
 		iter++;
 		diff = maxDifference(w,u,N*N);
+        t3+= omp_get_wtime() - tp;
 
 		//printf("%f\n", diff);
 	}
 
 
     time = omp_get_wtime() - time;
+    printf("%f %f %f %f\n", t0,t1,t2,t3);
 
-
-	plotGraph(tol,N,w);
+	//plotGraph(tol,N,w);
 
 	// for(int i = 0; i < N; i++){
 	// 	for(int j = 0; j < N; j++){
