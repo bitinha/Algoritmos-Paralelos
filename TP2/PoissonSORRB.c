@@ -104,7 +104,17 @@ int main(int argc, char const *argv[])
 	while(diff > tol)
 	{
 		tp = omp_get_wtime();
-		memcpy(u,w, N*N*sizeof(float));
+		#pragma omp parallel for
+		for (int i = 0; i < omp_get_num_threads(); ++i)
+		{
+			if (i != omp_get_num_threads()-1){
+				memcpy(u+(i*N*N)/8,w+(i*N*N)/8, (N*N)/8*sizeof(float));
+			}
+			else{
+				memcpy(u+(i*N*N)/8,w+(i*N*N)/8, (N*N-((i*N*N)/8))*sizeof(float));
+			}
+		}
+
         t0+= omp_get_wtime() - tp;
 		tp = omp_get_wtime();
         #pragma omp parallel for
