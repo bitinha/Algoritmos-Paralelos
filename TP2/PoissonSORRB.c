@@ -48,7 +48,6 @@ float maxDifference(float *a, float *b, int N){
             max = m;
         }
     }
-    
 	return max;
 }
 
@@ -107,14 +106,15 @@ int main(int argc, char const *argv[])
 		#pragma omp parallel for
 		for (int i = 0; i < omp_get_num_threads(); ++i)
 		{
-			if (i != omp_get_num_threads()-1){
-				memcpy(u+(i*N*N)/8,w+(i*N*N)/8, (N*N)/8*sizeof(float));
+			int nt = omp_get_num_threads();
+			int passo = (N*N)/nt;
+			if (i != nt-1){
+				memcpy(u+i*passo,w+i*passo, passo*sizeof(float));
 			}
 			else{
-				memcpy(u+(i*N*N)/8,w+(i*N*N)/8, (N*N-((i*N*N)/8))*sizeof(float));
+				memcpy(u+i*passo,w+i*passo, (N*N-(i*passo))*sizeof(float));
 			}
 		}
-
         t0+= omp_get_wtime() - tp;
 		tp = omp_get_wtime();
         #pragma omp parallel for
@@ -143,12 +143,11 @@ int main(int argc, char const *argv[])
 		diff = maxDifference(w,u,N*N);
         t3+= omp_get_wtime() - tp;
 
-		//printf("%f\n", diff);
 	}
 
 
     time = omp_get_wtime() - time;
-    printf("%f %f %f %f\n", t0,t1,t2,t3);
+    printf("t0=%f; t1=%f; t2=%f; t3=%f\n", t0,t1,t2,t3);
 
 	//plotGraph(tol,N,w);
 
